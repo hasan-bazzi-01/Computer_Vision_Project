@@ -1,3 +1,7 @@
+class_id_mapping = {4: 0, 9: 1, 11: 2}
+test_label_dir = '/content/drive/MyDrive/data/Testing/labels'
+remap_class_ids(test_label_dir, class_id_mapping)
+
 !python test.py --weights /content/yolov7/runs/train/exp/weights/best.pt --data /content/drive/MyDrive/data/Testing/testing.yaml --img 640 --iou-thres 0.5 --conf-thres 0.5
 
 
