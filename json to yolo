@@ -1,0 +1,30 @@
+def convert_json_to_yolo(labels_dir, images_dir, output_dir):
+
+    for label_file in os.listdir(labels_dir):
+        if label_file.endswith('.json'):
+            json_path = os.path.join(labels_dir, label_file)
+            with open(json_path) as f:
+                labels = json.load(f)
+            
+            # Assuming image and label files share the same base name
+            image_file = label_file.replace('.json', '.jpg')
+            image_path = os.path.join(images_dir, image_file)
+            image_size = Image.open(image_path).size  # Returns (width, height)
+            width, height = image_size
+            
+            yolo_labels = []
+            for obj in labels:
+                class_id = obj["ObjectClassId"]
+                x_center = ((obj["Left"] + obj["Right"]) / 2) / width
+                y_center = ((obj["Top"] + obj["Bottom"]) / 2) / height
+                bbox_width = (obj["Right"] - obj["Left"]) / width
+                bbox_height = (obj["Bottom"] - obj["Top"]) / height
+                
+                yolo_labels.append(f"{class_id} {x_center:.6f} {y_center:.6f} {bbox_width:.6f} {bbox_height:.6f}")
+            
+            # Save the YOLO formatted labels to a .txt file
+            output_path = os.path.join(output_dir, image_file.replace('.jpg', '.txt'))
+            with open(output_path, 'w') as f:
+                f.write("\n".join(yolo_labels))
+
+
