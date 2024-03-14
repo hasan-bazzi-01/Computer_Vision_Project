@@ -1,0 +1,67 @@
+import os
+
+train_images_dir = r'/content/drive/MyDrive/data/data/Training/images'
+image_paths = [os.path.join(train_images_dir, filename) for filename in os.listdir(train_images_dir) if filename.endswith('.jpg')]
+
+
+
+
+from torch.utils.data import random_split
+
+total_images = len(image_paths)
+train_size = int(0.8 * total_images)
+validation_size = total_images - train_size
+
+# Assuming image_paths is a list of all image paths
+indices = list(range(total_images))
+train_indices, val_indices = random_split(indices, [train_size, validation_size])
+
+
+
+
+
+import shutil
+
+output_base = r'/content/drive/MyDrive/data/data/Split'
+train_images_output_dir = os.path.join(output_base, 'train', 'images')
+train_labels_output_dir = os.path.join(output_base, 'train', 'labels')
+val_images_output_dir = os.path.join(output_base, 'val', 'images')
+val_labels_output_dir = os.path.join(output_base, 'val', 'labels')
+
+os.makedirs(train_images_output_dir, exist_ok=True)
+os.makedirs(train_labels_output_dir, exist_ok=True)
+os.makedirs(val_images_output_dir, exist_ok=True)
+os.makedirs(val_labels_output_dir, exist_ok=True)
+
+
+
+train_labels_dir = '/content/drive/MyDrive/data/data/Training/labels' 
+
+
+# Function to copy files based on indices
+def copy_files(indices, source_images_dir, source_labels_dir, target_images_dir, target_labels_dir):
+    for idx in indices:
+        image_path = image_paths[idx]
+        filename = os.path.basename(image_path)
+        label_filename = filename.replace('.jpg', '.txt')
+
+        # Construct source and target paths for images and labels
+        source_image_path = os.path.join(source_images_dir, filename)
+        target_image_path = os.path.join(target_images_dir, filename)
+        source_label_path = os.path.join(source_labels_dir, label_filename)
+        target_label_path = os.path.join(target_labels_dir, label_filename)
+
+        # Copy files
+        shutil.copy2(source_image_path, target_image_path)
+        if os.path.exists(source_label_path):  # Check if the label file exists before copying
+            shutil.copy2(source_label_path, target_label_path)
+
+# Copy training files
+copy_files(train_indices.indices, train_images_dir, train_labels_dir, train_images_output_dir, train_labels_output_dir)
+
+# Copy validation files
+copy_files(val_indices.indices, train_images_dir, train_labels_dir, val_images_output_dir, val_labels_output_dir)
+
+
+
+
