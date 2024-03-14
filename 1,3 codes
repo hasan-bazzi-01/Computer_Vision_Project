@@ -1,0 +1,69 @@
+import os
+import json
+from PIL import Image
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision.transforms.functional import to_tensor
+
+class BMWDataset(torch.utils.data.Dataset):
+    def __init__(self, images_dir, labels_dir, transform=None):
+        self.images_dir = images_dir
+        self.labels_dir = labels_dir
+        self.transform = transform
+
+        self.images = [file for file in os.listdir(images_dir) if file.endswith('.jpg')]
+        self.images.sort()  # Ensure consistent order
+
+    def __len__(self):
+        return len(self.images)
+    
+    def __getitem__(self, idx):
+        # Construct file paths
+        img_name = self.images[idx]
+        img_path = os.path.join(self.images_dir, img_name)
+        label_name = img_name.replace('.jpg', '.json')
+        label_path = os.path.join(self.labels_dir, label_name)
+        
+  
+        image = Image.open(img_path).convert('RGB')  # Convert to RGB to ensure consistent channel size
+        
+  
+        with open(label_path) as f:
+            labels = json.load(f)
+        
+        # Apply transformations
+        if self.transform:
+            image = self.transform(image)
+        else:
+            image = to_tensor(image) 
+
+        return image, labels
+
+# Transformations 
+
+import albumentations as A
+transform =A.Compose([
+    A.HorizontalFlip(p=0.5),
+    A.RandomBrightnessContrast(p=0.2),
+    A.Rotate(limit=130, p=0.5),
+    A.Blur(blur_limit=300, p=0.2),
+    A.GaussNoise(var_limit=(10.0, 50.0), p=0.2),
+    A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=30, p=0.5),
+    A.RGBShift(r_shift_limit=200, g_shift_limit=200, b_shift_limit=200, p=0.5),
+])
+
+# Example usage
+train_images_dir = r'/content/drive/MyDrive/data/data/Training/images'
+train_labels_dir = r'/content/drive/MyDrive/data/data/Training/labels/json'
+test_images_dir = r'/content/drive/MyDrive/data/data/Testing/images'
+test_labels_dir = r'/content/drive/MyDrive/data/data/Testing/labels/json'
+
+
+train_dataset = BMWDataset(train_images_dir, train_labels_dir, transform=transform)
+test_dataset = BMWDataset(test_images_dir, test_labels_dir, transform=transform)
+
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=True)
+
+
