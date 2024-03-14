@@ -1,0 +1,33 @@
+import os
+
+def remap_class_ids(label_dir, class_id_mapping):
+
+    for filename in os.listdir(label_dir):
+        if filename.endswith('.txt'):
+            file_path = os.path.join(label_dir, filename)
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+            
+            remapped_lines = []
+            for line in lines:
+                parts = line.strip().split()
+                class_id = int(parts[0])
+                if class_id in class_id_mapping:
+                    remapped_class_id = class_id_mapping[class_id]
+                    parts[0] = str(remapped_class_id)
+                    remapped_line = ' '.join(parts)
+                    remapped_lines.append(remapped_line)
+            
+            with open(file_path, 'w') as file:
+                for line in remapped_lines:
+                    file.write(f"{line}\n")
+
+
+train_label_dir = '/content/drive/MyDrive/data/data/Split/train/labels'  
+remap_class_ids(train_label_dir, class_id_mapping)
+
+val_label_dir = '/content/drive/MyDrive/data/data/Split/val/labels'  
+remap_class_ids(val_label_dir, class_id_mapping)
+
+
+
