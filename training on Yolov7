@@ -1,0 +1,14 @@
+!git clone https://github.com/WongKinYiu/yolov7.git
+cd yolov7
+!pip install -r requirements.txt
+
+!python train.py --img 640 --batch 16 --epochs 15 --data /content/drive/MyDrive/data/data/Split/dataset.yaml --weights yolov7.pt --device 0
+
+
+
+
+#output 
+Class      Images      Labels         P          R      mAP@.5  mAP@.5:.95
+ dolly      1186         722       0.379        0.87       0.389       0.333
+ bin        1186         346       0.403       0.948       0.407       0.379
+ jack       1186         784       0.401       0.941       0.398       0.383
