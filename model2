@@ -1,0 +1,95 @@
+import os
+import torch
+from PIL import Image
+from torch.utils.data import Dataset, DataLoader
+import torchvision.transforms as transforms
+
+class Dataset(Dataset):
+    def __init__(self, img_dir, label_dir, transform=None):
+        self.img_dir = img_dir
+        self.label_dir = label_dir
+        self.transform = transform
+        self.img_files = os.listdir(img_dir)
+
+    def __len__(self):
+        return len(self.img_files)
+
+    def __getitem__(self, idx):
+        # Load image
+        img_path = os.path.join(self.img_dir, self.img_files[idx])
+        image = Image.open(img_path).convert("RGB")
+
+        # Load labels
+        label_file = self.img_files[idx].replace("jpg", "txt")
+        label_path = os.path.join(self.label_dir, label_file)
+        boxes = []
+        labels = []
+        with open(label_path, 'r') as file:
+            for line in file.readlines():
+                cls, x_center, y_center, width, height = map(float, line.split())
+                x_min = x_center - width / 2
+                y_min = y_center - height / 2
+                x_max = x_center + width / 2
+                y_max = y_center + height / 2
+                boxes.append([x_min, y_min, x_max, y_max])
+                labels.append(int(cls))
+        
+        boxes = torch.as_tensor(boxes, dtype=torch.float32)
+        labels = torch.as_tensor(labels, dtype=torch.int64)
+        target = {"boxes": boxes, "labels": labels}
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, target
+
+
+
+
+transform = transforms.Compose([transforms.ToTensor()])
+dataset = Dataset(
+    img_dir="/content/drive/MyDrive/data/Training/images", 
+    label_dir="/content/drive/MyDrive/data/Training/labels", 
+    transform=transform
+)
+data_loader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
+
+
+
+
+
+import torchvision.models.detection as detection
+
+num_classes = 4  # Include background
+model2 = detection.fasterrcnn_resnet50_fpn(pretrained=True)
+in_features = model2.roi_heads.box_predictor.cls_score.in_features
+
+# Replace the head of the model
+model2.roi_heads.box_predictor = detection.faster_rcnn.FastRCNNPredictor(in_features, num_classes)
+
+
+from torch.optim import SGD
+import torch
+
+device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
+model2.to(device)
+
+optimizer = SGD(model2.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
+
+
+num_epochs = 5
+for epoch in range(num_epochs):
+    model2.train()
+    for images, targets in data_loader:
+        images = [image.to(device) for image in images] 
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+        optimizer.zero_grad()
+        loss_dict = model2(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        losses.backward()
+        optimizer.step()
+
+    print(f"Epoch {epoch+1}, Loss: {losses.item()}")
+
+
