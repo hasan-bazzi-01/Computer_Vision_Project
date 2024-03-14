@@ -1,3 +1,6 @@
+# Define your remapping here
+class_id_mapping = {4: 0, 5: 1, 7: 2}
+
 import os
 
 def remap_class_ids(label_dir, class_id_mapping):
