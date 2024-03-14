@@ -1,0 +1,8 @@
+!python test.py --weights /content/yolov7/runs/train/exp/weights/best.pt --data /content/drive/MyDrive/data/Testing/testing.yaml --img 640 --iou-thres 0.5 --conf-thres 0.5
+
+
+ Class      Images      Labels      P           R      mAP@.5  mAP@.5:.95: 
+  all        1186        1852       0.393        0.75       0.304        0.24
+  dolly      1186         722       0.382       0.573       0.221       0.173
+  bin        1186         346       0.391       0.795       0.327       0.244
+  jack       1186         784       0.407       0.881       0.363       0.304
