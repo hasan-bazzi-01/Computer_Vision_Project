@@ -1,0 +1,14 @@
+from torch.utils.data import DataLoader, random_split
+
+total_train_samples = len(train_dataset)
+train_size = int(0.8 * total_train_samples) 
+validation_size = total_train_samples - train_size
+
+
+train_dataset, validation_dataset = random_split(train_dataset, [train_size, validation_size])
+
+
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+
+
+validation_loader = DataLoader(validation_dataset, batch_size=4, shuffle=False)
