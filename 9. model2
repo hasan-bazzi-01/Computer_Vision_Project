@@ -52,10 +52,7 @@ dataset = Dataset(
     label_dir="/content/drive/MyDrive/data/Training/labels", 
     transform=transform
 )
-data_loader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
-
-
-
+data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 
 import torchvision.models.detection as detection
