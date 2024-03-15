@@ -16,22 +16,19 @@ class BMWDataset2(torch.utils.data.Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        # Construct file paths
         img_name = self.images[idx]
         img_path = os.path.join(self.images_dir, img_name)
         label_name = img_name.replace('.jpg', '.json')
         label_path = os.path.join(self.labels_dir, label_name)
 
-        # Load image
         image = Image.open(img_path).convert('RGB')
 
         with open(label_path) as f:
             labels = json.load(f)
 
-        # Draw rectangles and class names based on provided structure
+        
         if labels:
             for label in labels:
-                # Extract coordinates (adjust field names if necessary)
                 left = label['Left']
                 top = label['Top']
                 right = label['Right']
@@ -39,16 +36,13 @@ class BMWDataset2(torch.utils.data.Dataset):
                 class_name = label.get('ObjectClassName', 'Unknown')  # Handle potential missing class name
 
                 # Convert PIL image to NumPy array for OpenCV compatibility
-                image = np.array(image)  # Assuming image is a PIL Image object
+                image = np.array(image)  
 
-                # Draw rectangle
                 cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 2)
 
-                # Extract and write class name
                 cv2.putText(image, class_name, (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX,
                             2, (255, 255, 255), 2, cv2.LINE_AA)
 
-        # Other transformations (if necessary)
         if self.transform:
             image = self.transform(image)
 
