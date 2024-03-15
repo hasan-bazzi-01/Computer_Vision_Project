@@ -1,0 +1,3 @@
+%load_ext tensorboard
+%tensorboard --logdir /content/yolov7/runs/train
+
