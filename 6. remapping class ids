@@ -1,4 +1,4 @@
-# Define your remapping here
+
 class_id_mapping = {4: 0, 5: 1, 7: 2}
 
 import os
