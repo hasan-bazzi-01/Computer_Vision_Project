@@ -1,3 +1,6 @@
+#<class_id> <x_center> <y_center> <width> <height>
+
+
 def convert_json_to_yolo(labels_dir, images_dir, output_dir):
 
     for label_file in os.listdir(labels_dir):
@@ -6,7 +9,7 @@ def convert_json_to_yolo(labels_dir, images_dir, output_dir):
             with open(json_path) as f:
                 labels = json.load(f)
             
-            # Assuming image and label files share the same base name
+            
             image_file = label_file.replace('.json', '.jpg')
             image_path = os.path.join(images_dir, image_file)
             image_size = Image.open(image_path).size  # Returns (width, height)
